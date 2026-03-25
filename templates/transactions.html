@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Transactions</h3>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5>Issue Part</h5>
+        <form method="POST" action="{{ url_for('issue_part') }}" class="row g-2">
+          <div class="col-12">
+            <label class="form-label">Part</label>
+            <select name="part_id" class="form-select" required>
+              <option value="" disabled selected>Select a part</option>
+              {% for p in parts %}
+                <option value="{{ p.id }}">{{ p.name }} (Stock: {{ p.stock }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Quantity</label>
+            <input type="number" min="1" name="quantity" class="form-control" required>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-danger w-100" type="submit">Issue</button>
+          </div>
+        </form>
+        <div class="form-text mt-2">Issuing checks available stock dynamically.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5>Return Part</h5>
+        <form method="POST" action="{{ url_for('return_part') }}" class="row g-2">
+          <div class="col-12">
+            <label class="form-label">Part</label>
+            <select name="part_id" class="form-select" required>
+              <option value="" disabled selected>Select a part</option>
+              {% for p in parts %}
+                <option value="{{ p.id }}">{{ p.name }} (Stock: {{ p.stock }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Quantity</label>
+            <input type="number" min="1" name="quantity" class="form-control" required>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-success w-100" type="submit">Return</button>
+          </div>
+        </form>
+        <div class="form-text mt-2">Returns are recorded as transactions.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="mb-0">Transaction History</h5>
+    </div>
+
+    <form class="row g-2 mb-3" method="GET" action="{{ url_for('transactions') }}">
+      <div class="col-md-3">
+        <label class="form-label">Type</label>
+        <select name="type" class="form-select">
+          <option value="" {% if not filters.type %}selected{% endif %}>All</option>
+          <option value="issue" {% if filters.type == "issue" %}selected{% endif %}>Issue</option>
+          <option value="return" {% if filters.type == "return" %}selected{% endif %}>Return</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Part Name</label>
+        <input name="part" class="form-control" value="{{ filters.part }}" placeholder="Search part...">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">User</label>
+        <input name="user" class="form-control" value="{{ filters.user }}" placeholder="Search user...">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Limit</label>
+        <input name="limit" class="form-control" value="{{ filters.limit }}">
+      </div>
+
+      <div class="col-md-1 d-flex align-items-end">
+        <button class="btn btn-outline-secondary w-100" type="submit">Go</button>
+      </div>
+
+      <div class="col-12">
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('transactions') }}">Clear Filters</a>
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Part</th>
+            <th>Type</th>
+            <th>Qty</th>
+            <th>User</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in transactions %}
+          <tr>
+            <td>#{{ t.id }}</td>
+            <td>{{ t.part_name }}</td>
+            <td>
+              {% if t.type == "issue" %}
+                <span class="badge text-bg-danger">Issue</span>
+              {% else %}
+                <span class="badge text-bg-success">Return</span>
+              {% endif %}
+            </td>
+            <td>{{ t.quantity }}</td>
+            <td>{{ t.user }}</td>
+            <td>{{ t.timestamp }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
